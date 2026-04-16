@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,27 +40,44 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Lab4Theme {
-                PersonListScreen(viewModel) { person ->
-                    val intent = Intent(this@MainActivity, DetailActivity::class.java).apply {
-                        putExtra("PERSON", person)
-                    }
-                    startActivity(intent)
+                val filterText by viewModel._filterText.collectAsState()
+                PersonListScreen(
+                    viewModel = viewModel,
+                    filterText = filterText,
+                    onFilterChange = { viewModel.setFilter(it) },
+                    onPersonClick = { person ->
+                        val intent = Intent(this, DetailActivity::class.java).apply {
+                            putExtra("PERSON", person)
                         }
-
-                }
+                        startActivity(intent)
+                    }
+                )
             }
         }
     }
+}
 
 
 @Composable
 fun PersonListScreen(
     viewModel: PersonViewModel,
+    filterText: String,
+    onFilterChange: (String) -> Unit,
     onPersonClick: (Person) -> Unit
 ) {
-    val people by viewModel.people.collectAsState()
+    val people by viewModel.filteredPeople.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // Поле поиска
+        TextField(
+            value = filterText,
+            onValueChange = onFilterChange,
+            label = { Text("Поиск по имени") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(people) { person ->
                 PersonItem(person, onClick = { onPersonClick(person) })
