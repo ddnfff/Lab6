@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import kotlinx.parcelize.Parcelize
 
+
 @Parcelize
 data class Person(
     val id: Int,
@@ -11,5 +12,8 @@ data class Person(
     val age: Int,
     val profession: String,
     val bio: String,
-    @DrawableRes val photoRes: Int
+    @DrawableRes val photoRes: Int,
+    val isFavorite: Boolean = false
 ) : Parcelable
+
+
