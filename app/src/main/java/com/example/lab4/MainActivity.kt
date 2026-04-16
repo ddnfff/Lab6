@@ -49,7 +49,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import androidx.compose.material.icons.outlined.Star
-
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
     private val viewModel: PersonViewModel by viewModels()
@@ -80,7 +81,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun PersonListScreen(
     viewModel: PersonViewModel,
@@ -91,8 +91,26 @@ fun PersonListScreen(
     onPersonClick: (Person) -> Unit
 ) {
     val people by viewModel.filteredPeople.collectAsState()
+    val stats by viewModel.stats.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Статистика",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Количество пользователей: ${stats.count}")
+                Text("Средний возраст: %.1f".format(stats.averageAge))
+            }
+        }
 
         TextField(
             value = filterText,
@@ -100,23 +118,43 @@ fun PersonListScreen(
             label = { Text("Поиск по имени") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 1.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = { onSortChange(SortType.NAME_ASC) }) {
-                Text(if (sortType == SortType.NAME_ASC) "А-Я ✓" else "А-Я")
+            OutlinedButton(
+                onClick = { onSortChange(SortType.NAME_ASC) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = if (sortType == SortType.NAME_ASC) "А-Я ✓" else "А-Я",
+                    fontSize = 12.sp
+                )
             }
-            OutlinedButton(onClick = { onSortChange(SortType.AGE_ASC) }) {
-                Text(if (sortType == SortType.AGE_ASC) "Возраст↑ ✓" else "Возраст ↑")
+
+            OutlinedButton(
+                onClick = { onSortChange(SortType.AGE_ASC) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = if (sortType == SortType.AGE_ASC) "Возраст↑ ✓" else "Возраст ↑",
+                    fontSize = 12.sp
+                )
             }
-            OutlinedButton(onClick = { onSortChange(SortType.AGE_DESC) }) {
-                Text(if (sortType == SortType.AGE_DESC) "Возраст↓ ✓" else "Возраст ↓")
+
+            OutlinedButton(
+                onClick = { onSortChange(SortType.AGE_DESC) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = if (sortType == SortType.AGE_DESC) "Возраст↓ ✓" else "Возраст ↓",
+                    fontSize = 12.sp
+                )
             }
         }
 
@@ -146,7 +184,6 @@ fun PersonListScreen(
         }
     }
 }
-
 @Composable
 fun PersonItem(
     person: Person,

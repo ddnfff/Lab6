@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
+
 
 enum class SortType {
     NAME_ASC,
@@ -34,12 +36,16 @@ class PersonViewModel : ViewModel() {
     private val _filterText = MutableStateFlow("")
     val filterText: StateFlow<String> = _filterText.asStateFlow()
 
+    data class PersonStats(
+        val count: Int = 0,
+        val averageAge: Double = 0.0
+    )
+
     private val _sortType = MutableStateFlow(SortType.NAME_ASC)
     val sortType: StateFlow<SortType> = _sortType.asStateFlow()
 
     val filteredPeople: StateFlow<List<Person>> =
         combine(_people, _filterText, _sortType) { list, filter, sortType ->
-
             val filteredList = if (filter.isBlank()) {
                 list
             } else {
@@ -56,7 +62,22 @@ class PersonViewModel : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = _people.value
         )
-
+    val stats: StateFlow<PersonStats> = filteredPeople
+        .map { people ->
+            if (people.isEmpty()) {
+                PersonStats(0, 0.0)
+            } else {
+                PersonStats(
+                    count = people.size,
+                    averageAge = people.map { it.age }.average()
+                )
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PersonStats()
+        )
     fun setFilter(text: String) {
         _filterText.value = text
     }
