@@ -61,6 +61,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 class MainActivity : ComponentActivity() {
 
@@ -109,6 +111,7 @@ fun PersonListScreen(
 ) {
     val people by viewModel.filteredPeople.collectAsState()
     val stats by viewModel.stats.collectAsState()
+
 
     Column(
         modifier = Modifier
@@ -256,7 +259,7 @@ fun PersonItem(
     onDeleteClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(true) }
-
+    var showDeleteDialog by remember { mutableStateOf(false) }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + expandVertically(),
@@ -322,20 +325,43 @@ fun PersonItem(
 
                     IconButton(
                         onClick = {
-                            visible = false
+                            showDeleteDialog = true
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Удалить",
-                            tint = Color.Red
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
             }
         }
     }
-
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Подтверждение удаления") },
+            text = { Text("Вы уверены, что хотите удалить пользователя ${person.name}?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        visible = false
+                    }
+                ) {
+                    Text("Удалить")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
     LaunchedEffect(visible) {
         if (!visible) {
             delay(300)
